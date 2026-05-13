@@ -44,7 +44,6 @@ workspaces/
 exploiter-mcp/workspaces/
 exploiter/workspaces/
 .workshop.lock
-.opencode/
 
 # Reports and audit data (generated, not source)
 *.log
