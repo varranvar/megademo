@@ -1,4 +1,4 @@
-# Ubuntu Archive AI Hygiene
+# Archive Tools
 
 AI-powered strategies for improving the quality and health of packages in the
 Ubuntu Archive — starting with the Rust toolchain and Rust libraries.
