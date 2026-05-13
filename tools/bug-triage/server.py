@@ -5,12 +5,56 @@ and exploring upstream issue trackers.
 """
 
 import json
+import os
 import re
 from dataclasses import asdict
+from datetime import datetime, timezone
 from mcp.server.fastmcp import FastMCP
 
 import lp_client
 import upstream_search
+
+DATA_DIR = os.path.join(
+    os.path.dirname(__file__), "..", "..", "frontend", "data", "bug-triage"
+)
+
+
+def _write_result(package_name: str, result: dict) -> str | None:
+    """Write analysis result to the frontend data directory."""
+    try:
+        os.makedirs(DATA_DIR, exist_ok=True)
+    except Exception:
+        return None
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    safe_name = re.sub(r"[^\w-]", "_", package_name or "unknown")
+    filename = f"{safe_name}-{timestamp}.json"
+    filepath = os.path.join(DATA_DIR, filename)
+
+    try:
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(result, f, indent=2)
+    except Exception:
+        return None
+
+    manifest_path = os.path.join(DATA_DIR, "manifest.json")
+    manifest = []
+    if os.path.exists(manifest_path):
+        try:
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                manifest = json.load(f)
+        except Exception:
+            manifest = []
+
+    if filename not in manifest:
+        manifest.append(filename)
+        try:
+            with open(manifest_path, "w", encoding="utf-8") as f:
+                json.dump(manifest, f, indent=2)
+        except Exception:
+            pass
+
+    return filename
 
 STOP_WORDS = {
     "the", "and", "for", "with", "from", "this", "that", "have", "has",
@@ -107,11 +151,17 @@ def search_similar_bugs(bug_id: int) -> str:
                     )
                     upstream_issues.extend(issues)
 
-    # Search using homepage URL if no results yet
-    if not upstream_issues and upstream.homepage_url:
-        issues = upstream_search.search_upstream(
-            upstream.homepage_url, title_keywords
-        )
+    # Search using homepage URL or bug tracker URL
+    search_urls = []
+    if upstream.homepage_url:
+        search_urls.append(upstream.homepage_url)
+    if upstream.bug_tracker_url:
+        search_urls.append(upstream.bug_tracker_url)
+    
+    for url in search_urls:
+        if upstream_issues:
+            break
+        issues = upstream_search.search_upstream(url, title_keywords)
         upstream_issues.extend(issues)
 
     result = {
@@ -124,7 +174,11 @@ def search_similar_bugs(bug_id: int) -> str:
             "total_upstream_issues": len(upstream_issues),
             "upstream_found": bool(upstream.project_name or upstream.bug_watch_urls),
         },
+        "triage_timestamp": datetime.now(timezone.utc).isoformat(),
     }
+
+    _write_result(bug.package_name, result)
+
     return json.dumps(result, indent=2, default=str)
 
 

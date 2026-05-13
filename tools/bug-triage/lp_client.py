@@ -45,13 +45,21 @@ def get_bug(bug_id: int) -> BugInfo:
     lp = _get_lp()
     bug = lp.bugs[bug_id]
 
-    # Get the first bug task for status/importance/package
+    # Get all bug tasks - prefer non-Fix Released tasks for package name
     tasks = list(bug.bug_tasks)
     first_task = tasks[0] if tasks else None
+    
+    # Find the most relevant task (prefer non-closed statuses)
+    preferred_task = first_task
+    closed_statuses = {"Fix Released", "Invalid", "Won't Fix", "Expired"}
+    for task in tasks:
+        if task.status not in closed_statuses:
+            preferred_task = task
+            break
 
     package_name = None
-    if first_task:
-        target_name = first_task.bug_target_display_name or ""
+    if preferred_task:
+        target_name = preferred_task.bug_target_display_name or ""
         # Format is typically "packagename (Ubuntu)" or "projectname"
         match = re.match(r"^(\S+)", target_name)
         if match:
@@ -62,8 +70,8 @@ def get_bug(bug_id: int) -> BugInfo:
         title=bug.title,
         description=bug.description or "",
         tags=list(bug.tags),
-        status=first_task.status if first_task else "Unknown",
-        importance=first_task.importance if first_task else "Unknown",
+        status=preferred_task.status if preferred_task else "Unknown",
+        importance=preferred_task.importance if preferred_task else "Unknown",
         package_name=package_name,
         heat=bug.heat or 0,
         date_created=str(bug.date_created),
@@ -177,8 +185,15 @@ def get_upstream_info(bug_id: int) -> UpstreamInfo:
     if not tasks:
         return info
 
-    first_task = tasks[0]
-    target_name = first_task.bug_target_display_name or ""
+    # Find the most relevant task (prefer non-closed statuses)
+    closed_statuses = {"Fix Released", "Invalid", "Won't Fix", "Expired"}
+    preferred_task = tasks[0]
+    for task in tasks:
+        if task.status not in closed_statuses:
+            preferred_task = task
+            break
+
+    target_name = preferred_task.bug_target_display_name or ""
     match = re.match(r"^(\S+)", target_name)
     package_name = match.group(1) if match else None
 
