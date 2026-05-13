@@ -9,6 +9,11 @@
       "type": "stdio",
       "command": "./run-tool.sh",
       "args": ["cve-audit"]
+    },
+    "exploiter": {
+      "type": "stdio",
+      "command": "./run-tool.sh",
+      "args": ["exploiter"]
     }
   }
 }
