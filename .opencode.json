@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "bug-triage": {
+      "type": "stdio",
+      "command": "./run-tool.sh",
+      "args": ["bug-triage"]
+    }
+  }
+}
