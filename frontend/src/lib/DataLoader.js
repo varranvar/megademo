@@ -1,4 +1,4 @@
-const DATA_ROOT = '/data'
+const DATA_ROOT = ''
 
 export default {
   async load(toolName, runId) {

@@ -4,6 +4,11 @@
       "type": "stdio",
       "command": "./run-tool.sh",
       "args": ["bug-triage"]
+    },
+    "cve-audit": {
+      "type": "stdio",
+      "command": "./run-tool.sh",
+      "args": ["cve-audit"]
     }
   }
 }

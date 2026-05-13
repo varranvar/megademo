@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    echo "Usage: $0 <package> <series> <sanitizer>"
+    echo "  package    - Source package name"
+    echo "  series     - Ubuntu series"
+    echo "  sanitizer  - asan, ubsan, or tsan"
+    exit 1
+}
+
+if [ $# -lt 3 ]; then
+    usage
+fi
+
+PACKAGE="$1"
+SERIES="$2"
+SANITIZER="$3"
+IMAGE="ubuntu-build-${SERIES}"
+LOG_DIR="/tmp/sanitizer-logs/${PACKAGE}/${SANITIZER}"
+mkdir -p "${LOG_DIR}"
+
+case "${SANITIZER}" in
+    asan)   FLAGS="-fsanitize=address" ;;
+    ubsan)  FLAGS="-fsanitize=undefined" ;;
+    tsan)   FLAGS="-fsanitize=thread" ;;
+    *)
+        echo "ERROR: Unknown sanitizer '${SANITIZER}'. Use: asan, ubsan, tsan"
+        exit 1
+        ;;
+esac
+
+echo "Building ${PACKAGE} for ${SERIES} with ${SANITIZER} sanitizer..."
+podman run --rm \
+    -v "/tmp/${PACKAGE}:/src:rw" \
+    -v "${LOG_DIR}:/logs:rw" \
+    -e "CFLAGS=${FLAGS} -g -O1" \
+    -e "CXXFLAGS=${FLAGS} -g -O1" \
+    -e "LDFLAGS=${FLAGS}" \
+    "${IMAGE}" \
+    bash -c "cd /src && sudo apt-get build-dep -y . && dpkg-buildpackage -us -uc 2>&1 | tee /logs/sanitizer-build.log"
+
+echo "Sanitizer build log saved to ${LOG_DIR}/sanitizer-build.log"
+echo "Review the log for sanitizer errors."

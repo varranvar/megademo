@@ -1,3 +1,4 @@
 # Ignore all analysis output files.
-# Only commit manifest/README files if needed.
+# Keep manifest.json files for discovery.
 *.json
+!manifest.json

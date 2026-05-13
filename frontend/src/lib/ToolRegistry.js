@@ -1,7 +1,8 @@
-const DATA_ROOT = '/data'
+const DATA_ROOT = ''
 
 const KNOWN_TOOLS = [
   'bug-triage',
+  'cve-audit',
   'vulnerability-analysis',
   'autopkgtest-recommendations',
 ]
