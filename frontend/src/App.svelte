@@ -174,9 +174,8 @@
     cursor: pointer;
     font-size: 0.9rem;
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: baseline;
+    flex-direction: column;
+    gap: 0.15rem;
   }
   
   .is-active {
