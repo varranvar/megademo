@@ -3,17 +3,11 @@
 </script>
 
 <div class="p-card">
-  <pre>{JSON.stringify(data, null, 2)}</pre>
+  <div class="p-card__header">
+    <h4 class="p-heading--4">Raw Data</h4>
+  </div>
+  <hr />
+  <div class="p-card__content">
+    <pre class="p-code-copyable"><code>{JSON.stringify(data, null, 2)}</code></pre>
+  </div>
 </div>
-
-<style>
-  pre {
-    text-align: left;
-    background: #1e1e1e;
-    color: #d4d4d4;
-    padding: 1rem;
-    border-radius: 0.25rem;
-    overflow-x: auto;
-    margin: 0;
-  }
-</style>

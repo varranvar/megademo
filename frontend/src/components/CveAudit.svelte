@@ -1,36 +1,36 @@
 <script>
-  export let data
+  let { data } = $props()
 
-  $: cves = data.cves || []
-  $: series = data.supported_series || []
-  $: versions = data.current_versions || {}
-  $: seriesSummary = data.series_summary || {}
-  $: prioritySummary = data.priority_summary || {}
+  let cves = $derived(data.cves || [])
+  let series = $derived(data.supported_series || [])
+  let versions = $derived(data.current_versions || {})
+  let seriesSummary = $derived(data.series_summary || {})
+  let prioritySummary = $derived(data.priority_summary || {})
 </script>
 
 {#if Object.keys(seriesSummary).length > 0}
-  <div class="summary">
-    <h3>Series Risk Summary</h3>
-    <table class="risk-table">
+  <div class="p-card u-no-padding--bottom">
+    <h3 class="p-heading--4">Series Risk Summary</h3>
+    <table class="p-table--mobile-card" role="grid">
       <thead>
         <tr>
-          <th>Series</th>
-          <th>Open</th>
-          <th>Needs Eval</th>
-          <th>Fixed</th>
-          <th>Not Affected</th>
-          <th>Other</th>
+          <th scope="col">Series</th>
+          <th scope="col">Open</th>
+          <th scope="col">Needs Eval</th>
+          <th scope="col">Fixed</th>
+          <th scope="col">Not Affected</th>
+          <th scope="col">Other</th>
         </tr>
       </thead>
       <tbody>
         {#each Object.entries(seriesSummary) as [seriesName, stats]}
           <tr>
-            <td>{seriesName}</td>
-            <td class={stats.open > 0 ? 'warning' : 'ok'}>{stats.open}</td>
-            <td>{stats.needs_evaluation}</td>
-            <td>{stats.fixed}</td>
-            <td>{stats.not_affected}</td>
-            <td>{stats.other}</td>
+            <td aria-label="Series">{seriesName}</td>
+            <td aria-label="Open" class={stats.open > 0 ? 'p-text--error' : 'p-text--success'}>{stats.open}</td>
+            <td aria-label="Needs Eval">{stats.needs_evaluation}</td>
+            <td aria-label="Fixed">{stats.fixed}</td>
+            <td aria-label="Not Affected">{stats.not_affected}</td>
+            <td aria-label="Other">{stats.other}</td>
           </tr>
         {/each}
       </tbody>
@@ -38,160 +38,84 @@
   </div>
 {/if}
 
-{#if prioritySummary}
-  <div class="summary">
-    <h3>Priority Summary</h3>
-    <ul class="priority-list">
+{#if prioritySummary && Object.keys(prioritySummary).length > 0}
+  <div class="p-card">
+    <h3 class="p-heading--4">Priority Summary</h3>
+    <div class="p-chip-group">
       {#each Object.entries(prioritySummary) as [prio, count]}
         {#if count > 0}
-          <li><span class="badge badge-{prio}">{prio}</span> {count}</li>
+          <span class="p-chip--{prio.toLowerCase()}">{prio}: {count}</span>
         {/if}
       {/each}
-    </ul>
+    </div>
   </div>
 {/if}
 
 {#if versions && !versions.error}
-  <div class="versions">
-    <h3>Current Versions</h3>
-    <ul>
+  <div class="p-card">
+    <h3 class="p-heading--4">Current Versions</h3>
+    <ul class="p-list">
       {#each Object.entries(versions) as [seriesName, info]}
-        <li><strong>{info.display_name || seriesName}:</strong> {info.version || 'N/A'}</li>
+        <li class="p-list__item"><strong>{info.display_name || seriesName}:</strong> {info.version || 'N/A'}</li>
       {/each}
     </ul>
   </div>
 {/if}
 
 {#if cves.length > 0}
-  <h3>CVEs ({data.cves_analyzed} of {data.total_cves_found})</h3>
-  <div class="cve-list">
+  <h3 class="p-heading--4">CVEs ({data.cves_analyzed} of {data.total_cves_found})</h3>
+  <div class="row">
     {#each cves as cve}
-      <div class="cve-card">
-        <div class="cve-header">
-          <h4>{cve.cve_id}</h4>
-          <span class="priority priority-{cve.priority.toLowerCase()}">{cve.priority}</span>
-          <span class="status">{cve.summary_status}</span>
+      <div class="col-6">
+        <div class="p-card">
+          <div class="p-card__header">
+            <h4 class="p-heading--5">{cve.cve_id}</h4>
+            <span class="p-status-label--{cve.priority.toLowerCase()}">{cve.priority}</span>
+          </div>
+          <hr />
+          <div class="p-card__content">
+            <p class="u-text--muted">{cve.summary_status}</p>
+            <p class="p-text--small">{cve.description}</p>
+            {#if cve.package_statuses && Object.keys(cve.package_statuses).length > 0}
+              <table class="p-table--mobile-card">
+                <thead>
+                  <tr>
+                    <th scope="col">Series</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {#each Object.entries(Object.values(cve.package_statuses)[0]) as [s, status]}
+                    <tr>
+                      <td aria-label="Series">{s}</td>
+                      <td aria-label="Status" class={
+                        status.toLowerCase().includes('vulnerable') ? 'p-text--error' :
+                        status.toLowerCase().includes('fixed') || status.toLowerCase().includes('released') ? 'p-text--success' :
+                        ''
+                      }>{status}</td>
+                    </tr>
+                  {/each}
+                </tbody>
+              </table>
+            {/if}
+          </div>
         </div>
-        <p class="description">{cve.description}</p>
-        {#if cve.package_statuses && Object.keys(cve.package_statuses).length > 0}
-          <table class="status-table">
-            <thead>
-              <tr>
-                <th>Series</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {#each Object.entries(Object.values(cve.package_statuses)[0]) as [s, status]}
-                <tr>
-                  <td>{s}</td>
-                  <td class={
-                    status.toLowerCase().includes('vulnerable') ? 'warning' :
-                    status.toLowerCase().includes('fixed') || status.toLowerCase().includes('released') ? 'ok' :
-                    ''
-                  }>{status}</td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        {/if}
       </div>
     {/each}
   </div>
 {:else}
-  <p class="empty">No CVEs found for <strong>{data.package}</strong> in the analysed pages.</p>
+  <div class="p-notification--warning">
+    <div class="p-notification__content">
+      <h5 class="p-notification__title">No CVEs Found</h5>
+      <p class="p-notification__message">No CVEs found for <strong>{data.package}</strong> in the analysed pages.</p>
+    </div>
+  </div>
 {/if}
 
 <style>
-  .summary {
-    background: #f5f5f5;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-  }
-  .versions {
-    background: #eef;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-  }
-  .risk-table, .status-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 0.5rem;
-  }
-  th, td {
-    padding: 0.5rem;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-  }
-  .warning {
-    color: #d32f2f;
-    font-weight: bold;
-  }
-  .ok {
-    color: #388e3c;
-  }
-  .cve-list {
-    display: grid;
-    gap: 1rem;
-  }
-  .cve-card {
-    background: #fafafa;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 1rem;
-  }
-  .cve-header {
+  .p-chip-group {
     display: flex;
-    gap: 1rem;
-    align-items: center;
-    margin-bottom: 0.5rem;
     flex-wrap: wrap;
-  }
-  .priority {
-    padding: 0.2rem 0.6rem;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    font-weight: bold;
-  }
-  .priority-critical { background: #d32f2f; color: white; }
-  .priority-high { background: #f57c00; color: white; }
-  .priority-medium { background: #fbc02d; color: black; }
-  .priority-low { background: #388e3c; color: white; }
-  .priority-negligible { background: #9e9e9e; color: white; }
-  .priority-unknown { background: #ccc; color: black; }
-  .status {
-    color: #666;
-    font-size: 0.9rem;
-  }
-  .description {
-    color: #444;
-    margin-bottom: 0.75rem;
-  }
-  .priority-list {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-  .badge {
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    font-weight: bold;
-  }
-  .badge-critical { background: #d32f2f; color: white; }
-  .badge-high { background: #f57c00; color: white; }
-  .badge-medium { background: #fbc02d; color: black; }
-  .badge-low { background: #388e3c; color: white; }
-  .badge-negligible { background: #9e9e9e; color: white; }
-  .badge-unknown { background: #ccc; color: black; }
-  .empty {
-    color: #888;
-    font-style: italic;
+    gap: 0.5rem;
   }
 </style>
