@@ -3,6 +3,7 @@ const DATA_ROOT = ''
 const KNOWN_TOOLS = [
   'bug-triage',
   'cve-audit',
+  'ubuntu-archive',
   'vulnerability-analysis',
   'autopkgtest-recommendations',
 ]

@@ -1,0 +1,6 @@
+name: uv
+version: "0.1"
+summary: Install the uv Python package manager
+description: |
+  Installs uv, an extremely fast Python package installer and resolver,
+  so it's available inside the workshop.
