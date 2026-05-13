@@ -4,6 +4,7 @@
   import BugTriage from './components/BugTriage.svelte'
   import CveAudit from './components/CveAudit.svelte'
   import UbuntuArchive from './components/UbuntuArchive.svelte'
+  import Exploiter from './components/Exploiter.svelte'
   import GenericTool from './components/GenericTool.svelte'
 
   let tools = $state([])
@@ -129,6 +130,8 @@
         <CveAudit data={runData} />
       {:else if selectedTool === 'ubuntu-archive'}
         <UbuntuArchive data={runData} />
+      {:else if selectedTool === 'exploiter'}
+        <Exploiter data={runData} />
       {:else}
         <GenericTool data={runData} />
       {/if}

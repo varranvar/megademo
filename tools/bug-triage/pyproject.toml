@@ -11,3 +11,6 @@ dependencies = [
 
 [project.scripts]
 lp-bug-triage = "server:main"
+
+[tool.setuptools]
+py-modules = ["server", "lp_client", "upstream_search"]

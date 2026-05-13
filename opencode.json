@@ -11,6 +11,11 @@
       "enabled": true,
       "command": ["./run-tool.sh", "cve-audit"]
     },
+    "exploiter": {
+      "type": "local",
+      "enabled": true,
+      "command": ["./run-tool.sh", "exploiter"]
+    },
     "ubuntu-archive": {
       "type": "local",
       "enabled": true,
