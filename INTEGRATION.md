@@ -23,7 +23,7 @@ pip install -e .
 ```
 
 ## 5. Register in Root MCP Config
-Add an entry to the root `.opencode.json`:
+Add an entry to the root `opencode.json`:
 ```json
 "my-new-tool": {
   "type": "stdio",

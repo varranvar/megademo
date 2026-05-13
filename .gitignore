@@ -14,4 +14,3 @@ node_modules/
 .env.fish
 .DS_Store
 frontend/dist/
-.opencode/
