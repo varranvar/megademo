@@ -11,6 +11,7 @@ build/
 venv/
 node_modules/
 .env
+.env.fish
 .DS_Store
 frontend/dist/
 .opencode/
