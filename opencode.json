@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "bug-triage": {
+      "type": "local",
+      "enabled": true,
+      "command": ["./run-tool.sh", "bug-triage"]
+    },
+    "cve-audit": {
+      "type": "local",
+      "enabled": true,
+      "command": ["./run-tool.sh", "cve-audit"]
+    },
+    "exploiter": {
+      "type": "local",
+      "enabled": true,
+      "command": ["./run-tool.sh", "exploiter"]
+    },
+    "ubuntu-archive": {
+      "type": "local",
+      "enabled": true,
+      "command": ["./run-tool.sh", "ubuntu-archive"]
+    }
+  }
+}

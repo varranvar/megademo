@@ -1,0 +1,33 @@
+/* Vanilla overrides and custom styles */
+body {
+  margin: 0;
+  font-family: 'Ubuntu variable', 'Ubuntu', -apple-system, 'Segoe UI', 'Roboto', 'Oxygen', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.tool-section h3 {
+  text-transform: capitalize;
+}
+
+.tool-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.bug-list {
+  display: grid;
+  gap: 1rem;
+}
+
+pre {
+  text-align: left;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 1rem;
+  border-radius: 0.25rem;
+  overflow-x: auto;
+}

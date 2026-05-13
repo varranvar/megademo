@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    echo "Usage: $0 <package> <series> <source-dir> [image-name]"
+    echo "  package    - Source package name"
+    echo "  series     - Ubuntu series"
+    echo "  source-dir - Directory containing extracted source"
+    echo "  image-name - Podman image (default: ubuntu-build-<series>)"
+    exit 1
+}
+
+if [ $# -lt 3 ]; then
+    usage
+fi
+
+PACKAGE="$1"
+SERIES="$2"
+SOURCE_DIR="$3"
+IMAGE="${4:-ubuntu-build-${SERIES}}"
+
+LOG_DIR="/tmp/build-logs/${PACKAGE}"
+mkdir -p "${LOG_DIR}"
+
+echo "Building ${PACKAGE} for ${SERIES} in container ${IMAGE}..."
+podman run --rm \
+    -v "${SOURCE_DIR}:/src:rw" \
+    -v "${LOG_DIR}:/logs:rw" \
+    "${IMAGE}" \
+    bash -c "cd /src && sudo apt-get build-dep -y . && dpkg-buildpackage -us -uc 2>&1 | tee /logs/build.log"
+
+echo "Build log saved to ${LOG_DIR}/build.log"

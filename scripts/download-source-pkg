@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    echo "Usage: $0 <package> [series] [dest-dir]"
+    echo "  package  - Source package name (e.g., cargo, rustc)"
+    echo "  series   - Ubuntu series (default: noble)"
+    echo "  dest-dir - Destination directory (default: /tmp/<package>)"
+    exit 1
+}
+
+if [ $# -lt 1 ]; then
+    usage
+fi
+
+PACKAGE="$1"
+SERIES="${2:-noble}"
+DEST="${3:-/tmp/${PACKAGE}}"
+
+mkdir -p "${DEST}"
+cd "${DEST}"
+
+echo "Downloading source for ${PACKAGE}/${SERIES}..."
+apt-get source "${PACKAGE}/${SERIES}" 2>&1
+
+echo "Source extracted to ${DEST}"
+ls -la

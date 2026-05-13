@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    echo "Usage: $0 <series> [image-name]"
+    echo "  series    - Ubuntu series (e.g., noble, jammy)"
+    echo "  image-name - Podman image name (default: ubuntu-build-<series>)"
+    exit 1
+}
+
+if [ $# -lt 1 ]; then
+    usage
+fi
+
+SERIES="$1"
+IMAGE="${2:-ubuntu-build-${SERIES}}"
+
+CONTAINERFILE=$(mktemp)
+trap "rm -f ${CONTAINERFILE}" EXIT
+
+cat > "${CONTAINERFILE}" <<EOF
+FROM ubuntu:${SERIES}
+
+RUN apt-get update && apt-get install -y --no-install-recommends \\
+    build-essential devscripts debhelper dh-cargo \\
+    sbuild pbuilder lintian autopkgtest \\
+    podman crun \\
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m -s /bin/bash builder
+USER builder
+WORKDIR /home/builder
+EOF
+
+echo "Building Podman image ${IMAGE} for ${SERIES}..."
+podman build -t "${IMAGE}" -f "${CONTAINERFILE}" .
+
+echo "Image ${IMAGE} ready."
+echo "Run builds with: scripts/run-build <package> <series> <source-dir>"

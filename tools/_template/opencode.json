@@ -1,0 +1,9 @@
+{
+  "mcp": {
+    "template-tool": {
+      "type": "local",
+      "enabled": true,
+      "command": ["python3", "server.py"]
+    }
+  }
+}

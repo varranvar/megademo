@@ -1,0 +1,49 @@
+.workshop.lock
+.launchpad_cache/
+frontend/data
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+*.pyc
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Node
+node_modules/
+.env
+.env.fish
+.DS_Store
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+
+# Project-specific
+workspaces/
+exploiter-mcp/workspaces/
+exploiter/workspaces/
+.workshop.lock
+
+# Reports and audit data (generated, not source)
+*.log
