@@ -8,11 +8,17 @@ __pycache__/
 dist/
 build/
 *.whl
+*.pyc
+*.pyo
 
 # Virtual environments
 .venv/
 venv/
 env/
+
+# Node
+node_modules/
+frontend/dist/
 
 # IDE
 .vscode/
@@ -25,10 +31,15 @@ env/
 .DS_Store
 Thumbs.db
 
+# Secrets
+.env
+
 # Project-specific
 workspaces/
 exploiter-mcp/workspaces/
 exploiter/workspaces/
+.workshop.lock
+.opencode/
 
 # Reports and audit data (generated, not source)
 *.log

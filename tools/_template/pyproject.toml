@@ -1,0 +1,11 @@
+[project]
+name = "template-tool"
+version = "0.1.0"
+description = "Template analysis tool for opencode"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.0.0",
+]
+
+[project.scripts]
+template-tool = "server:main"
