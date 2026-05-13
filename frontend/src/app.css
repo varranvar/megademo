@@ -1,33 +1,341 @@
-/* Vanilla overrides and custom styles */
+/* Vanilla Framework overrides and custom styles */
+
+:root {
+  --ubuntu-orange: #e95420;
+  --ubuntu-dark: #2c2c2c;
+  --ubuntu-light-bg: #fafafa;
+  --sidebar-width: 280px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   margin: 0;
+  padding: 0;
   font-family: 'Ubuntu variable', 'Ubuntu', -apple-system, 'Segoe UI', 'Roboto', 'Oxygen', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--ubuntu-light-bg);
+  color: var(--ubuntu-dark);
+  line-height: 1.6;
 }
 
 #app {
   min-height: 100vh;
-}
-
-.tool-section h3 {
-  text-transform: capitalize;
-}
-
-.tool-section ul {
-  list-style: none;
+  margin: 0;
   padding: 0;
+}
+
+.l-application {
+  display: grid;
+  grid-template-areas:
+    "header header"
+    "sidebar main";
+  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-rows: 56px 1fr;
+  gap: 0;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.l-navigation-bar {
+  grid-area: header;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--ubuntu-dark);
+  margin: 0;
+  padding: 0;
+}
+
+.l-navigation-bar .p-panel {
+  margin: 0;
+  padding: 0;
+}
+
+.l-navigation-bar .p-panel__header {
+  padding: 0.75rem 1.5rem;
   margin: 0;
 }
 
-.bug-list {
-  display: grid;
-  gap: 1rem;
+.l-navigation-bar .p-panel__title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.l-navigation {
+  grid-area: sidebar;
+  background: #fff;
+  border-right: 1px solid #e5e5e5;
+  overflow-y: auto;
+  height: calc(100vh - 56px);
+  position: sticky;
+  top: 56px;
+  margin: 0;
+  padding: 0;
+}
+
+.l-navigation .p-panel,
+.l-navigation .p-panel__content {
+  margin: 0;
+  padding: 1rem 1.25rem;
+}
+
+.l-navigation h5 {
+  margin-bottom: 1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.l-navigation h6 {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  text-transform: capitalize;
+  color: var(--ubuntu-orange);
+}
+
+.l-navigation .p-list--divided {
+  margin-bottom: 1.5rem;
+}
+
+.l-navigation .p-list__item {
+  padding: 0;
+}
+
+.l-navigation button {
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+}
+
+.l-navigation button:hover {
+  background-color: rgba(233, 84, 32, 0.08);
+}
+
+.l-navigation button.is-active {
+  background-color: rgba(233, 84, 32, 0.12);
+  border-left: 3px solid var(--ubuntu-orange);
+  font-weight: 500;
+}
+
+.l-main {
+  grid-area: main;
+  background: var(--ubuntu-light-bg);
+  overflow-y: auto;
+  padding: 0 1.25rem 1rem 1.25rem;
+  display: flow-root;
+}
+
+.l-main > *:first-child {
+  margin-top: 0 !important;
+  padding-top: 1rem;
+}
+
+@media (max-width: 900px) {
+  .l-application {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "main";
+  }
+  
+  .l-navigation {
+    display: none;
+  }
+  
+  .l-main {
+    padding: 1rem;
+  }
+}
+
+.p-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin: 0 0 1.5rem 0;
+}
+
+.p-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  background: #fafafa;
+  border-bottom: 1px solid #eee;
+  border-radius: 8px 8px 0 0;
+}
+
+.p-card__title {
+  font-weight: 500;
+  margin: 0;
+}
+
+.p-card__content {
+  padding: 1rem 1.25rem;
+}
+
+.p-card--highlighted {
+  background: linear-gradient(135deg, var(--ubuntu-orange) 0%, #c34113 100%);
+  color: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.p-card--highlighted .p-heading--2 {
+  color: #fff;
+  font-size: 2rem;
+  margin: 0 0 0.25rem 0;
+}
+
+.p-card--highlighted .p-text--muted {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
+}
+
+.p-status-label {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.p-status-label--critical {
+  background-color: #c7162b;
+  color: #fff;
+}
+
+.p-status-label--high {
+  background-color: var(--ubuntu-orange);
+  color: #fff;
+}
+
+.p-status-label--medium {
+  background-color: #f99b11;
+  color: #111;
+}
+
+.p-status-label--low {
+  background-color: #0e8420;
+  color: #fff;
+}
+
+.p-status-label--negligible {
+  background-color: #999;
+  color: #fff;
+}
+
+.p-status-label--unknown {
+  background-color: #666;
+  color: #fff;
+}
+
+.p-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.p-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.p-chip--critical { background: rgba(199, 22, 43, 0.12); color: #c7162b; }
+.p-chip--high { background: rgba(233, 84, 32, 0.12); color: #c34113; }
+.p-chip--medium { background: rgba(249, 155, 17, 0.15); color: #b87a0d; }
+.p-chip--low { background: rgba(14, 132, 32, 0.12); color: #0e8420; }
+.p-chip--negligible { background: rgba(153, 153, 153, 0.15); color: #666; }
+.p-chip--unknown { background: rgba(102, 102, 102, 0.15); color: #444; }
+
+.p-table--mobile-card {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.p-table--mobile-card th,
+.p-table--mobile-card td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.p-table--mobile-card th {
+  background: #f8f8f8;
+  font-weight: 500;
+  font-size: 0.85rem;
 }
 
 pre {
-  text-align: left;
   background: #1e1e1e;
   color: #d4d4d4;
-  padding: 1rem;
-  border-radius: 0.25rem;
+  padding: 1.25rem;
+  border-radius: 8px;
   overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.u-text--error {
+  color: #c7162b;
+  font-weight: 600;
+}
+
+.u-text--success {
+  color: #0e8420;
+  font-weight: 600;
+}
+
+.p-notification {
+  border-radius: 8px;
+  border-left: 4px solid;
+  padding: 0.75rem 1rem;
+  margin: 0;
+}
+
+.p-notification--information {
+  background: rgba(233, 84, 32, 0.08);
+  border-color: var(--ubuntu-orange);
+}
+
+.p-notification--negative {
+  background: rgba(199, 22, 43, 0.08);
+  border-color: #c7162b;
+}
+
+.p-notification--warning {
+  background: rgba(249, 155, 17, 0.08);
+  border-color: #f99b11;
+}
+
+.u-animation--spin {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #e5e5e5;
+  margin: 0.75rem 0 1rem 0;
 }
