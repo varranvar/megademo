@@ -1,0 +1,13 @@
+name: bug-triage
+description: |
+  Analyses a Launchpad bug to find similar bugs in Launchpad and related
+  upstream issues on GitHub/GitLab. Useful for triaging duplicate reports.
+parameters:
+  - name: bug_id
+    type: integer
+    description: The Launchpad bug ID to analyse.
+examples:
+  - prompt: "Find bugs similar to Launchpad bug 123456"
+    invocation: "search_similar_bugs(bug_id=123456)"
+  - prompt: "Show details for bug 654321"
+    invocation: "get_bug_details(bug_id=654321)"
