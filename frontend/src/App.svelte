@@ -5,10 +5,10 @@
   import CveAudit from './components/CveAudit.svelte'
   import GenericTool from './components/GenericTool.svelte'
 
-  let tools = []
-  let selectedTool = null
-  let selectedRun = null
-  let runData = null
+  let tools = $state([])
+  let selectedTool = $state(null)
+  let selectedRun = $state(null)
+  let runData = $state(null)
 
   async function refreshTools() {
     tools = await ToolRegistry.list()
@@ -23,94 +23,66 @@
   }
 </script>
 
-<main>
-  <h1>Package Analyser</h1>
-  <p class="subtitle">Canonical Hackathon — Read-only analysis suite</p>
-
-  <div class="layout">
-    <aside>
-      <h2>Tools</h2>
-      {#each tools as tool}
-        <div class="tool-section">
-          <h3>{tool.name}</h3>
-          <ul>
-            {#each tool.runs as run}
-              <li>
-                <button onclick={() => loadRun(tool.name, run)}>
-                  {run}
-                </button>
-              </li>
-            {/each}
-          </ul>
+<div class="l-application">
+  <header class="l-navigation-bar">
+    <div class="p-panel is-dark">
+      <div class="p-panel__header">
+        <h4 class="p-panel__title">Package Analyser</h4>
+        <div class="p-panel__controls">
+          <span class="p-text--small">Canonical Hackathon</span>
         </div>
-      {/each}
-      {#if tools.length === 0}
-        <p class="empty">No analysis data yet.</p>
-      {/if}
-    </aside>
+      </div>
+    </div>
+  </header>
 
-    <section class="viewer">
-      {#if runData}
-        <h2>{selectedTool} — {selectedRun}</h2>
-        {#if selectedTool === 'bug-triage'}
-          <BugTriage data={runData} />
-        {:else if selectedTool === 'cve-audit'}
-          <CveAudit data={runData} />
+  <aside class="l-navigation">
+    <div class="p-panel">
+      <div class="p-panel__content">
+        <h5 class="p-text--small-caps">Tools</h5>
+        <nav>
+          {#each tools as tool}
+            <div class="tool-section u-no-margin--bottom">
+              <h6 class="p-text--small-caps">{tool.name}</h6>
+              <ul class="p-list--divided">
+                {#each tool.runs as run}
+                  <li class="p-list__item">
+                    <button class="p-button--base is-dense u-no-margin--bottom" onclick={() => loadRun(tool.name, run)}>
+                      {run}
+                    </button>
+                  </li>
+                {/each}
+              </ul>
+            </div>
+          {/each}
+          {#if tools.length === 0}
+            <p class="p-text--small u-text--muted">No analysis data yet.</p>
+          {/if}
+        </nav>
+      </div>
+    </div>
+  </aside>
+
+  <main class="l-main">
+    <div class="p-strip is-shallow">
+      <div class="u-fixed-width">
+        {#if runData}
+          <h2 class="p-heading--4">{selectedTool} — {selectedRun}</h2>
+          {#if selectedTool === 'bug-triage'}
+            <BugTriage data={runData} />
+          {:else if selectedTool === 'cve-audit'}
+            <CveAudit data={runData} />
+          {:else}
+            <GenericTool data={runData} />
+          {/if}
         {:else}
-          <GenericTool data={runData} />
+          <div class="p-notification--information">
+            <div class="p-notification__content">
+              <h5 class="p-notification__title">Welcome</h5>
+              <p class="p-notification__message">Select a run from the sidebar to view analysis results.</p>
+            </div>
+          </div>
         {/if}
-      {:else}
-        <p class="placeholder">Select a run from the sidebar to view analysis results.</p>
-      {/if}
-    </section>
-  </div>
-</main>
-
-<style>
-  .subtitle {
-    color: #666;
-    margin-top: -1rem;
-    margin-bottom: 2rem;
-  }
-  .layout {
-    display: flex;
-    gap: 2rem;
-    text-align: left;
-  }
-  aside {
-    min-width: 250px;
-    border-right: 1px solid #ccc;
-    padding-right: 1rem;
-  }
-  .tool-section h3 {
-    margin-bottom: 0.5rem;
-    text-transform: capitalize;
-  }
-  .tool-section ul {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 1.5rem 0;
-  }
-  .tool-section li {
-    margin-bottom: 0.25rem;
-  }
-  button {
-    background: none;
-    border: none;
-    color: #0074d9;
-    cursor: pointer;
-    text-decoration: underline;
-    padding: 0;
-    font-size: inherit;
-  }
-  button:hover {
-    color: #0056a6;
-  }
-  .viewer {
-    flex: 1;
-  }
-  .empty, .placeholder {
-    color: #888;
-    font-style: italic;
-  }
-</style>
+      </div>
+    </div>
+  </main>
+</div>

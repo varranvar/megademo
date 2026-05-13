@@ -1,8 +1,10 @@
 <script>
-  export let data
+  let { data } = $props()
 </script>
 
-<pre>{JSON.stringify(data, null, 2)}</pre>
+<div class="p-card">
+  <pre>{JSON.stringify(data, null, 2)}</pre>
+</div>
 
 <style>
   pre {
@@ -10,7 +12,8 @@
     background: #1e1e1e;
     color: #d4d4d4;
     padding: 1rem;
-    border-radius: 8px;
+    border-radius: 0.25rem;
     overflow-x: auto;
+    margin: 0;
   }
 </style>
