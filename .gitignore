@@ -1,1 +1,6 @@
 .workshop.lock
+.mcp/
+.launchpad_cache/
+__pycache__/
+*.pyc
+.venv/
