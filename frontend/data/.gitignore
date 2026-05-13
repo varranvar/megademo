@@ -1,4 +1,0 @@
-# Ignore all analysis output files.
-# Keep manifest.json files for discovery.
-*.json
-!manifest.json

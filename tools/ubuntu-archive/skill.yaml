@@ -1,0 +1,14 @@
+name: ubuntu-archive
+description: |
+  Real-time access to the Ubuntu Archive via Launchpad and archive indices.
+  Provides 14 read-only tools for querying package versions, build status,
+  changelogs, autopkgtest results, bug lists, lintian output, and more.
+parameters:
+  - name: package
+    type: string
+    description: The source or binary package name to query.
+examples:
+  - prompt: "What is the latest version of cargo in noble?"
+    invocation: "get_package_version(package='cargo', series='noble')"
+  - prompt: "Search for rust-* packages in noble"
+    invocation: "search_packages(query='rust-*', series='noble')"

@@ -3,18 +3,18 @@
   "mcp": {
     "bug-triage": {
       "type": "local",
-      "command": ["./run-tool.sh", "bug-triage"],
-      "enabled": true
+      "enabled": true,
+      "command": ["./run-tool.sh", "bug-triage"]
     },
     "cve-audit": {
       "type": "local",
-      "command": ["./run-tool.sh", "cve-audit"],
-      "enabled": true
+      "enabled": true,
+      "command": ["./run-tool.sh", "cve-audit"]
     },
-    "exploiter": {
+    "ubuntu-archive": {
       "type": "local",
-      "command": ["./run-tool.sh", "exploiter"],
-      "enabled": true
+      "enabled": true,
+      "command": ["./run-tool.sh", "ubuntu-archive"]
     }
   }
 }
