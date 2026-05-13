@@ -1,0 +1,10 @@
+# workshop.yaml
+name: copilot
+base: ubuntu@26.04
+sdks:
+  - name: copilot-cli
+    channel: 1.0/stable
+
+actions:
+  copilot-yolo: copilot --yolo --interactive="$@"
+  copilot-yolo-prompt: copilot --yolo --prompt="$@"
