@@ -1,0 +1,4 @@
+{% macro severity_badge(severity) -%}
+{% set sev = severity | lower if severity else 'low' %}
+<span class="badge badge-sev-{{ sev }}">{{ severity or 'LOW' }}</span>
+{%- endmacro %}

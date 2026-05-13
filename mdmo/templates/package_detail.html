@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+{% from "partials/score_badge.html" import score_badge %}
+{% from "partials/severity_badge.html" import severity_badge %}
+
+{% block content %}
+<div class="package-detail">
+    <a href="/" class="back-link">&larr; Back to Dashboard</a>
+
+    <div class="detail-header">
+        <div class="detail-header-left">
+            <h1>{{ package.name }}</h1>
+            <div class="detail-meta">
+                <span class="meta-item">Version: {{ package.version or 'unknown' }}</span>
+                <span class="meta-item">Release: {{ package.release }}</span>
+                <span class="meta-item">Arch: {{ package.architecture }}</span>
+                <span class="meta-item">Component: {{ package.component }}</span>
+            </div>
+        </div>
+        <div class="detail-header-right">
+            <div class="score-hero">
+                <div class="score-value">{{ score_data.total_score }}</div>
+                <div class="score-grade grade-{{ score_data.grade }}">{{ score_data.grade.title() }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-tabs" x-data="{ tab: 'overview' }">
+        <nav class="tab-nav">
+            <button :class="{ active: tab === 'overview' }" @click="tab = 'overview'">Overview</button>
+            <button :class="{ active: tab === 'bugs' }" @click="tab = 'bugs'">Bugs ({{ bug_count }})</button>
+            <button :class="{ active: tab === 'cves' }" @click="tab = 'cves'">CVEs ({{ cve_count }})</button>
+        </nav>
+
+        <div class="tab-content" x-show="tab === 'overview'" x-cloak>
+            <div class="overview-grid">
+                <div class="score-breakdown">
+                    <h2>Score Breakdown</h2>
+                    <div class="breakdown-bars">
+                        {% for name, comp in score_data.components.items() %}
+                        <div class="breakdown-row">
+                            <div class="breakdown-label">
+                                <span>{{ comp.label }}</span>
+                                <span class="breakdown-score">{{ comp.score }}</span>
+                            </div>
+                            <div class="breakdown-track">
+                                <div class="breakdown-fill fill-{{ 'critical' if comp.score <= 30 else 'warning' if comp.score <= 55 else 'fair' if comp.score <= 75 else 'healthy' }}"
+                                     style="width: {{ comp.score }}%"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if score_trend %}
+                <div class="score-trend">
+                    <h2>Score Trend</h2>
+                    <canvas id="trendChart"></canvas>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="tab-content" x-show="tab === 'bugs'" x-cloak>
+            <div id="bugs-content" hx-get="/package/{{ package.name }}/bugs" hx-trigger="load">
+                <div class="table-loading">Loading bugs...</div>
+            </div>
+        </div>
+
+        <div class="tab-content" x-show="tab === 'cves'" x-cloak>
+            <div id="cves-content" hx-get="/package/{{ package.name }}/cves" hx-trigger="load">
+                <div class="table-loading">Loading CVEs...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if score_trend %}
+<script id="trend-data" type="application/json">{{ score_trend | tojson | safe }}</script>
+{% endif %}
+{% endblock %}

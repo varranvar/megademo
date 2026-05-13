@@ -1,0 +1,39 @@
+{% from "partials/severity_badge.html" import severity_badge %}
+
+<h2>Open Bugs</h2>
+{% if bugs %}
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Importance</th>
+                <th>Assignee</th>
+                <th>Last Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bug in bugs %}
+            <tr>
+                <td>
+                    {% if bug.bug_link %}
+                    <a href="{{ bug.bug_link }}" target="_blank" rel="noopener">#{{ bug.bug_id }}</a>
+                    {% else %}
+                    #{{ bug.bug_id }}
+                    {% endif %}
+                </td>
+                <td>{{ bug.title or 'Untitled' }}</td>
+                <td><span class="bug-status status-{{ bug.status | lower | replace(' ', '-') if bug.status else 'unknown' }}">{{ bug.status or 'N/A' }}</span></td>
+                <td>{{ severity_badge(bug.importance) }}</td>
+                <td>{{ bug.assignee or 'Unassigned' }}</td>
+                <td>{{ bug.last_updated.strftime('%Y-%m-%d') if bug.last_updated else '?' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">No open bugs found for this package.</div>
+{% endif %}
