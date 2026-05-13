@@ -4,7 +4,7 @@ base: ubuntu@26.04
 sdks:
   - name: opencode
     channel: latest/stable
-  - name: project-uv
+  - name: uv
 
 actions:
   opencode: OPENCODE_YOLO=true opencode "$@"
