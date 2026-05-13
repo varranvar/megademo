@@ -19,9 +19,9 @@ def parse_repo_url(url: str) -> tuple[str, str, str] | None:
     """Parse a URL into (platform, owner, repo).
 
     Returns None if the URL can't be parsed.
-    Supports GitHub and GitLab URLs.
+    Supports GitHub and GitLab URLs, including issue/PR pages.
     """
-    # GitHub: https://github.com/owner/repo
+    # GitHub: https://github.com/owner/repo or https://github.com/owner/repo/issues/123
     m = re.match(r"https?://github\.com/([^/]+)/([^/]+?)(?:\.git)?(?:/|$)", url)
     if m:
         return ("github", m.group(1), m.group(2))
