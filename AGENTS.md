@@ -11,6 +11,7 @@ Tools are registered in `.opencode.json` at the project root. The `run-tool.sh` 
 
 Current tools:
 - `bug-triage` — Finds Launchpad bug duplicates and upstream issues.
+- `cve-audit` — Analyses CVEs affecting Ubuntu packages across all supported series.
 
 ## Data Output Convention
 When a tool produces analysis, it should:

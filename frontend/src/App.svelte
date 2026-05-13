@@ -2,6 +2,7 @@
   import ToolRegistry from './lib/ToolRegistry.js'
   import DataLoader from './lib/DataLoader.js'
   import BugTriage from './components/BugTriage.svelte'
+  import CveAudit from './components/CveAudit.svelte'
   import GenericTool from './components/GenericTool.svelte'
 
   let tools = []
@@ -53,6 +54,8 @@
         <h2>{selectedTool} — {selectedRun}</h2>
         {#if selectedTool === 'bug-triage'}
           <BugTriage data={runData} />
+        {:else if selectedTool === 'cve-audit'}
+          <CveAudit data={runData} />
         {:else}
           <GenericTool data={runData} />
         {/if}
