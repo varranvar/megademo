@@ -3,6 +3,7 @@
   import DataLoader from './lib/DataLoader.js'
   import BugTriage from './components/BugTriage.svelte'
   import CveAudit from './components/CveAudit.svelte'
+  import Exploiter from './components/Exploiter.svelte'
   import GenericTool from './components/GenericTool.svelte'
 
   let tools = $state([])
@@ -126,6 +127,8 @@
         <BugTriage data={runData} />
       {:else if selectedTool === 'cve-audit'}
         <CveAudit data={runData} />
+      {:else if selectedTool === 'exploiter'}
+        <Exploiter data={runData} />
       {:else}
         <GenericTool data={runData} />
       {/if}
