@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    echo "Usage: $0 <source-dir> [output-format]"
+    echo "  source-dir     - Directory containing extracted source"
+    echo "  output-format  - text or json (default: json)"
+    exit 1
+}
+
+if [ $# -lt 1 ]; then
+    usage
+fi
+
+SOURCE_DIR="$1"
+FORMAT="${2:-json}"
+
+if [ ! -d "${SOURCE_DIR}" ]; then
+    echo "ERROR: Directory '${SOURCE_DIR}' does not exist."
+    exit 1
+fi
+
+DEBIAN_DIR="${SOURCE_DIR}/debian"
+if [ ! -d "${DEBIAN_DIR}" ]; then
+    echo "ERROR: No debian/ directory found in '${SOURCE_DIR}'."
+    exit 1
+fi
+
+echo "Analyzing coverage for ${SOURCE_DIR}..."
+
+CARGO_TOML="${SOURCE_DIR}/Cargo.toml"
+if [ -f "${CARGO_TOML}" ]; then
+    echo "Detected Rust project. Using cargo-llvm-cov..."
+    if command -v cargo-llvm-cov &>/dev/null; then
+        cd "${SOURCE_DIR}"
+        cargo llvm-cov --json 2>/dev/null || echo "Coverage analysis failed (may require nightly toolchain)"
+    else
+        echo "cargo-llvm-cov not found. Install with: cargo install cargo-llvm-cov"
+        echo "Alternatively, build with: RUSTFLAGS='-Zinstrument-coverage' cargo test"
+    fi
+else
+    echo "Detected non-Rust project. Using gcov/lcov..."
+    cd "${SOURCE_DIR}"
+    if command -v lcov &>/dev/null; then
+        make clean 2>/dev/null || true
+        make CFLAGS="--coverage -g -O0" CXXFLAGS="--coverage -g -O0" LDFLAGS="--coverage" 2>&1
+        make check 2>&1 || true
+        lcov --capture --directory . --output-file coverage.info 2>/dev/null
+        lcov --remove coverage.info '/usr/*' '/tmp/*' --output-file coverage.info 2>/dev/null
+        if [ "${FORMAT}" = "json" ]; then
+            lcov --summary coverage.info 2>&1 | tail -5
+        else
+            genhtml coverage.info --output-directory coverage-report 2>/dev/null
+            echo "HTML report generated in coverage-report/"
+        fi
+    else
+        echo "lcov not found. Install with: sudo apt install lcov"
+    fi
+fi

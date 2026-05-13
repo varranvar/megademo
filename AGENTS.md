@@ -45,3 +45,84 @@ Each skill follows the structure:
 ```
 
 For the full skill authoring workflow (drafting, testing, evaluating, iterating), invoke the **skill-creator** skill located at `.agents/skills/skill-creator/`.
+
+## MCP Servers
+
+### ubuntu-archive
+
+Real-time access to the Ubuntu Archive via Launchpad and archive indices.
+
+**Start command:**
+```bash
+cd /project/mcp/ubuntu-archive && uv run ubuntu-archive-mcp
+```
+
+**Configuration** (for opencode, add to `.config/opencode/config.json`):
+```json
+{
+  "mcpServers": {
+    "ubuntu-archive": {
+      "command": "uv",
+      "args": ["run", "ubuntu-archive-mcp"],
+      "cwd": "/project/mcp/ubuntu-archive"
+    }
+  }
+}
+```
+
+**Available tools:**
+
+| Tool | Description |
+|------|-------------|
+| `get_series_info` | List all Ubuntu series (name, version, status) |
+| `get_package_version` | Latest published version of a source package |
+| `search_packages` | Search packages by name or description (supports wildcards) |
+| `get_package_details` | Full metadata: deps, maintainer, section, description |
+| `get_changelog` | Fetch Debian changelog |
+| `get_build_status` | Build status across architectures |
+| `get_build_log` | Fetch a specific build log |
+| `get_autopkgtest_results` | Query autopkgtest results |
+| `get_reverse_dependencies` | Packages that depend on a given package |
+| `get_bug_list` | Search Launchpad bugs for a package |
+| `run_lintian` | Run lintian and return structured JSON |
+| `get_source_package` | Download and extract source package |
+| `get_copyright_file` | Fetch debian/copyright |
+| `get_package_files` | List files installed by a binary package |
+
+The MCP server uses **read-only** Launchpad access. When a user wants to take action (file a bug, propose a merge), provide the Launchpad URL and instructions for them to do it manually.
+
+## Available Skills
+
+| Skill | When to Use |
+|-------|-------------|
+| `archive-search` | Query the Ubuntu Archive for package info |
+| `fix-lintian` | Fix lintian errors/warnings in packages |
+| `fix-build-warnings` | Eliminate build warnings |
+| `sanitizer-builds` | Build with ASan/UBSan/TSan to find memory issues |
+| `coverage-analysis` | Measure and improve test coverage |
+| `write-autopkgtests` | Write autopkgtests for packages with none |
+| `analyze-skipped-tests` | Investigate skipped/failing autopkgtests |
+| `fix-copyright` | Fix outdated/inaccurate debian/copyright files |
+
+## Helper Scripts
+
+All scripts live in `/project/scripts/` and should be run with bash:
+
+| Script | Purpose |
+|--------|---------|
+| `download-source-pkg` | Download and extract a source package |
+| `run-lintian` | Run lintian with structured JSON output |
+| `container-setup` | Create a Podman build container |
+| `run-build` | Build a package in a container |
+| `run-sanitizer-build` | Build with sanitizers (asan/ubsan/tsan) |
+| `analyze-coverage` | Build with coverage and generate report |
+| `generate-autopkgtest` | Generate autopkgtest templates |
+| `analyze-copyright` | Compare source licenses with debian/copyright |
+
+## Package Scope
+
+Initially scoped to **Rust packages** — the Rust toolchain (rustc, cargo, clippy, rustfmt) and Rust libraries (librust-\*-dev, rust-\*).
+
+## Build Environment
+
+All builds use **Podman** containers. Use `scripts/container-setup` to create a build image, then `scripts/run-build` to build packages inside it.

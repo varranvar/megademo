@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    echo "Usage: $0 <source-dir>"
+    echo "  source-dir - Directory containing extracted source with debian/"
+    exit 1
+}
+
+if [ $# -lt 1 ]; then
+    usage
+fi
+
+SOURCE_DIR="$1"
+DEBIAN_DIR="${SOURCE_DIR}/debian"
+COPYRIGHT_FILE="${DEBIAN_DIR}/copyright"
+
+if [ ! -f "${COPYRIGHT_FILE}" ]; then
+    echo "ERROR: No debian/copyright found at ${COPYRIGHT_FILE}"
+    exit 1
+fi
+
+echo "Analyzing copyright for ${SOURCE_DIR}..."
+echo "Declared copyright:"
+head -50 "${COPYRIGHT_FILE}"
+echo "---"
+
+echo ""
+echo "Scanning source for actual license headers..."
+
+# Find license headers in source files
+declare -A LICENSE_COUNTS
+LICENSE_COUNTS["MIT"]=0
+LICENSE_COUNTS["Apache-2.0"]=0
+LICENSE_COUNTS["BSD-3-Clause"]=0
+LICENSE_COUNTS["GPL-2.0"]=0
+LICENSE_COUNTS["GPL-3.0"]=0
+LICENSE_COUNTS["LGPL"]=0
+LICENSE_COUNTS["unknown"]=0
+
+while IFS= read -r -d '' file; do
+    if head -30 "${file}" | grep -qi "permission is hereby granted.*free of charge"; then
+        LICENSE_COUNTS["MIT"]=$((LICENSE_COUNTS["MIT"] + 1))
+    elif head -30 "${file}" | grep -qi "apache license.*version 2.0"; then
+        LICENSE_COUNTS["Apache-2.0"]=$((LICENSE_COUNTS["Apache-2.0"] + 1))
+    elif head -30 "${file}" | grep -qi "redistribution and use in source and binary"; then
+        LICENSE_COUNTS["BSD-3-Clause"]=$((LICENSE_COUNTS["BSD-3-Clause"] + 1))
+    elif head -30 "${file}" | grep -qi "gnu general public license"; then
+        LICENSE_COUNTS["GPL-2.0"]=$((LICENSE_COUNTS["GPL-2.0"] + 1))
+    else
+        LICENSE_COUNTS["unknown"]=$((LICENSE_COUNTS["unknown"] + 1))
+    fi
+done < <(find "${SOURCE_DIR}" -type f \( -name '*.rs' -o -name '*.c' -o -name '*.h' -o -name '*.py' \) -print0 2>/dev/null | head -500)
+
+echo ""
+echo "License distribution in source files:"
+for lic in MIT Apache-2.0 BSD-3-Clause GPL-2.0 GPL-3.0 LGPL unknown; do
+    if [ "${LICENSE_COUNTS[$lic]}" -gt 0 ]; then
+        echo "  ${lic}: ${LICENSE_COUNTS[$lic]} files"
+    fi
+done
+
+echo ""
+echo "Compare with debian/copyright and fix any mismatches."
