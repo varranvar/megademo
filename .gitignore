@@ -3,4 +3,14 @@
 .launchpad_cache/
 __pycache__/
 *.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
 .venv/
+venv/
+node_modules/
+.env
+.DS_Store
+frontend/dist/
+.opencode/
