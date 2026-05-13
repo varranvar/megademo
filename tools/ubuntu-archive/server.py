@@ -4,6 +4,7 @@ import os
 import re
 import subprocess
 from collections import defaultdict
+from datetime import datetime, timezone
 from functools import lru_cache
 from typing import Any
 
@@ -18,6 +19,9 @@ ARCHIVE_BASE = "https://archive.ubuntu.com/ubuntu"
 CHANGES_BASE = "https://changelogs.ubuntu.com/changelogs"
 AUTOPKGTEST_API = "https://autopkgtest.ubuntu.com"
 LAUNCHPAD_CACHE = os.path.join(os.path.dirname(__file__), ".launchpad_cache")
+DATA_DIR = os.path.join(
+    os.path.dirname(__file__), "..", "..", "frontend", "data", "ubuntu-archive"
+)
 
 SERIES_ALIASES: dict[str, str] = {
     "14.04": "trusty",
@@ -48,6 +52,43 @@ def _get_lp() -> Launchpad:
     if _lp is None:
         _lp = Launchpad.login_anonymously("ubuntu-archive-mcp", "production", launchpadlib_dir=LAUNCHPAD_CACHE)
     return _lp
+
+
+def _write_result(package_name: str, result: dict) -> str | None:
+    try:
+        os.makedirs(DATA_DIR, exist_ok=True)
+    except Exception:
+        return None
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    safe_name = re.sub(r"[^\w-]", "_", package_name or "unknown")
+    filename = f"{safe_name}-{timestamp}.json"
+    filepath = os.path.join(DATA_DIR, filename)
+
+    try:
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(result, f, indent=2)
+    except Exception:
+        return None
+
+    manifest_path = os.path.join(DATA_DIR, "manifest.json")
+    manifest = []
+    if os.path.exists(manifest_path):
+        try:
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                manifest = json.load(f)
+        except Exception:
+            manifest = []
+
+    if filename not in manifest:
+        manifest.append(filename)
+        try:
+            with open(manifest_path, "w", encoding="utf-8") as f:
+                json.dump(manifest, f, indent=2)
+        except Exception:
+            pass
+
+    return filename
 
 
 def _resolve_series(series: str) -> str:
@@ -663,6 +704,120 @@ async def get_package_files(
         if len(files) >= 200:
             break
     return {"package": package, "series": series, "arch": arch, "files": files, "truncated": len(files) >= 200}
+
+
+@mcp.tool()
+async def analyze_package(
+    package: str,
+    series: str = "noble",
+    component: str = "main",
+    arch: str = "amd64",
+) -> str:
+    """Perform a comprehensive analysis of a package in the Ubuntu Archive.
+
+    Aggregates version info, build status, autopkgtest results, reverse
+    dependencies, open bugs, and package details into a single report
+    and writes it to the frontend data directory for display.
+
+    Args:
+        package: Source or binary package name (e.g., 'rustc', 'cargo')
+        series: Primary Ubuntu series to analyse
+        component: Archive component (main, universe, etc.)
+        arch: Architecture for build/test results
+    """
+    resolved = _resolve_series(series)
+
+    versions = {}
+    for alias, codename in [("resolute (26.04 LTS)", "resolute"), ("plucky (25.04)", "plucky"), ("noble (24.04 LTS)", "noble"), ("jammy (22.04 LTS)", "jammy")]:
+        try:
+            v = await get_package_version(package, codename)
+            if "error" not in v:
+                versions[alias] = v.get("version", "N/A")
+        except Exception:
+            pass
+    if not versions:
+        versions[resolved] = "N/A"
+
+    build_data = {}
+    for alias, codename in [("resolute (26.04 LTS)", "resolute"), ("noble (24.04 LTS)", "noble")]:
+        try:
+            bs = await get_build_status(package, codename)
+            if "error" not in bs:
+                build_data[alias] = bs.get("builds", [])
+        except Exception:
+            pass
+
+    adt_data = {}
+    for alias, codename in [("noble (24.04 LTS)", "noble"), ("jammy (22.04 LTS)", "jammy")]:
+        try:
+            adt = await get_autopkgtest_results(package, codename, arch)
+            if "error" not in adt:
+                adt_data[alias] = adt.get("results", [])
+        except Exception:
+            pass
+
+    rdep_data = {}
+    try:
+        rdeps = await get_reverse_dependencies(package, resolved, component, arch)
+        if "error" not in rdeps:
+            rdep_data[f"{resolved} ({series})"] = rdeps.get("reverse_dependencies", {})
+    except Exception:
+        pass
+
+    bug_data = []
+    try:
+        bl = await get_bug_list(package)
+        if "error" not in bl:
+            bug_data = bl.get("bugs", [])
+    except Exception:
+        pass
+
+    details = {}
+    try:
+        d = await get_package_details(package, resolved, component, arch)
+        if "error" not in d:
+            details = d
+    except Exception:
+        pass
+
+    total_builds = sum(len(v) for v in build_data.values())
+    succeeded = sum(1 for builds in build_data.values() for b in builds if "Successfully" in b.get("status", ""))
+    failed = sum(1 for builds in build_data.values() for b in builds if "Failed" in b.get("status", ""))
+    in_progress = sum(1 for builds in build_data.values() for b in builds if "building" in b.get("status", "").lower())
+    adt_pass = sum(1 for results in adt_data.values() for r in results if r.get("status") == "pass")
+    adt_fail = sum(1 for results in adt_data.values() for r in results if r.get("status") == "fail")
+    rdep_count = sum(len(pkgs) for deps in rdep_data.values() for pkgs in deps.values())
+    open_bugs = len(bug_data)
+    critical_bugs = sum(1 for b in bug_data if b.get("importance") == "Critical")
+    high_bugs = sum(1 for b in bug_data if b.get("importance") == "High")
+
+    result = {
+        "package": package,
+        "scan_date": datetime.now(timezone.utc).isoformat(),
+        "versions": versions,
+        "build_status": build_data,
+        "autopkgtest_results": adt_data,
+        "reverse_dependencies": rdep_data,
+        "bugs": bug_data,
+        "package_details": details,
+        "summary": {
+            "series_count": len(versions),
+            "architectures_built": total_builds,
+            "builds_succeeded": succeeded,
+            "builds_failed": failed,
+            "builds_in_progress": in_progress,
+            "autopkgtest_pass": adt_pass,
+            "autopkgtest_fail": adt_fail,
+            "reverse_dep_count": rdep_count,
+            "open_bugs": open_bugs,
+            "critical_bugs": critical_bugs,
+            "high_bugs": high_bugs,
+        },
+    }
+
+    _write_result(package, result)
+
+    return json.dumps(result, indent=2, default=str)
 
 
 def main():

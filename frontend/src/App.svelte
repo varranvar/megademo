@@ -3,6 +3,7 @@
   import DataLoader from './lib/DataLoader.js'
   import BugTriage from './components/BugTriage.svelte'
   import CveAudit from './components/CveAudit.svelte'
+  import UbuntuArchive from './components/UbuntuArchive.svelte'
   import Exploiter from './components/Exploiter.svelte'
   import GenericTool from './components/GenericTool.svelte'
 
@@ -127,6 +128,8 @@
         <BugTriage data={runData} />
       {:else if selectedTool === 'cve-audit'}
         <CveAudit data={runData} />
+      {:else if selectedTool === 'ubuntu-archive'}
+        <UbuntuArchive data={runData} />
       {:else if selectedTool === 'exploiter'}
         <Exploiter data={runData} />
       {:else}
@@ -154,6 +157,12 @@
             <div class="p-card__content">
               <h4>CVE Audit</h4>
               <p>Analyse CVEs affecting packages across Ubuntu series.</p>
+            </div>
+          </div>
+          <div class="p-card">
+            <div class="p-card__content">
+              <h4>Ubuntu Archive</h4>
+              <p>Query package versions, build status, tests, and bugs across Ubuntu series.</p>
             </div>
           </div>
           <div class="p-card">
