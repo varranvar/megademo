@@ -1,0 +1,11 @@
+name: template-tool
+description: |
+  A template analysis tool. Replace this with a description of what
+  your tool does (e.g., "Analyses Ubuntu packages for ...").
+parameters:
+  - name: package_name
+    type: string
+    description: Name of the source package to analyse.
+examples:
+  - prompt: "Run the template tool on package hello"
+    invocation: "example_tool(package_name='hello')"

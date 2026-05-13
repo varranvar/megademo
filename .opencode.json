@@ -1,9 +1,9 @@
 {
   "mcpServers": {
-    "lp-bug-triage": {
+    "bug-triage": {
       "type": "stdio",
-      "command": "python3",
-      "args": ["server.py"]
+      "command": "./run-tool.sh",
+      "args": ["bug-triage"]
     }
   }
 }
