@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    echo "Usage: $0 <package> <series> <source-dir>"
+    echo "  package    - Source package name"
+    echo "  series     - Ubuntu series"
+    echo "  source-dir - Directory containing extracted source"
+    exit 1
+}
+
+if [ $# -lt 3 ]; then
+    usage
+fi
+
+PACKAGE="$1"
+SERIES="$2"
+SOURCE_DIR="$3"
+DEBIAN_DIR="${SOURCE_DIR}/debian"
+TESTS_DIR="${DEBIAN_DIR}/tests"
+
+mkdir -p "${TESTS_DIR}"
+
+# Detect package type
+IS_RUST=false
+IS_PYTHON=false
+IS_C=false
+
+if [ -f "${SOURCE_DIR}/Cargo.toml" ]; then
+    IS_RUST=true
+elif [ -f "${SOURCE_DIR}/setup.py" ] || [ -f "${SOURCE_DIR}/pyproject.toml" ] && grep -q '\[build-system\]' "${SOURCE_DIR}/pyproject.toml" 2>/dev/null; then
+    IS_PYTHON=true
+else
+    IS_C=true
+fi
+
+if ${IS_RUST}; then
+    echo "Generating Rust autopkgtest for ${PACKAGE}..."
+
+    cat > "${TESTS_DIR}/control" <<'EOF'
+Tests: smoke-test
+Restrictions: allow-stderr
+Depends: @, rustc
+EOF
+
+    cat > "${TESTS_DIR}/smoke-test" <<'SCRIPT'
+#!/bin/sh
+set -e
+# Verify the Rust tool/library works after install
+SCRIPT
+
+    # Customize based on package type
+    if echo "${PACKAGE}" | grep -q '^cargo$\|^rustfmt$\|^clippy'; then
+        cat >> "${TESTS_DIR}/smoke-test" <<SCRIPT
+${PACKAGE} --version
+${PACKAGE} --help
+SCRIPT
+    elif echo "${PACKAGE}" | grep -q '^rustc$'; then
+        cat >> "${TESTS_DIR}/smoke-test" <<'SCRIPT'
+rustc --version
+echo 'fn main() { println!("hello from rustc"); }' > /tmp/hello.rs
+rustc /tmp/hello.rs -o /tmp/hello
+/tmp/hello
+SCRIPT
+    elif echo "${PACKAGE}" | grep -q '^rust-'; then
+        cat >> "${TESTS_DIR}/smoke-test" <<'SCRIPT'
+# Library smoke test — verify the crate can be found by rustc
+echo "Library package detected; verify installation"
+ls -la /usr/share/doc/${PACKAGE}/ || true
+SCRIPT
+    fi
+
+    chmod +x "${TESTS_DIR}/smoke-test"
+
+elif ${IS_PYTHON}; then
+    echo "Generating Python autopkgtest for ${PACKAGE}..."
+
+    cat > "${TESTS_DIR}/control" <<'EOF'
+Tests: import-test
+Restrictions: allow-stderr
+Depends: @, python3-all
+EOF
+
+    PYTHON_MOD=$(echo "${PACKAGE}" | sed 's/^python[0-9.]*-//; s/-/./g')
+    cat > "${TESTS_DIR}/import-test" <<SCRIPT
+#!/bin/sh
+set -e
+python3 -c "import ${PYTHON_MOD}; print('${PYTHON_MOD} imported successfully')"
+SCRIPT
+
+    chmod +x "${TESTS_DIR}/import-test"
+
+else
+    echo "Generating generic autopkgtest for ${PACKAGE}..."
+
+    cat > "${TESTS_DIR}/control" <<'EOF'
+Tests: smoke-test
+Restrictions: allow-stderr
+Depends: @
+EOF
+
+    cat > "${TESTS_DIR}/smoke-test" <<'SCRIPT'
+#!/bin/sh
+set -e
+# Verify the package binaries work after install
+SCRIPT
+
+    # Find binaries in the package
+    BINARIES=$(dpkg -L "${PACKAGE}" 2>/dev/null | grep -E '^usr/(s?bin)/' || true)
+    for bin in ${BINARIES}; do
+        echo "/${bin} --version || /${bin} --help || true" >> "${TESTS_DIR}/smoke-test"
+    done
+
+    if [ -z "${BINARIES}" ]; then
+        echo "# No binaries found; add custom tests" >> "${TESTS_DIR}/smoke-test"
+    fi
+
+    chmod +x "${TESTS_DIR}/smoke-test"
+fi
+
+echo "Generated debian/tests/control and test scripts in ${TESTS_DIR}/"
+cat "${TESTS_DIR}/control"

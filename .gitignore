@@ -1,4 +1,6 @@
 .workshop.lock
+.mcp/
+.launchpad_cache/
 __pycache__/
 *.pyc
 *.pyo
@@ -9,6 +11,7 @@ build/
 venv/
 node_modules/
 .env
+.env.fish
 .DS_Store
 frontend/dist/
 .opencode/
