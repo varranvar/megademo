@@ -14,7 +14,7 @@ Three pillars that work together:
 
 | Pillar | Purpose | Location |
 |--------|---------|----------|
-| **MCP Server** | Real-time data access to Launchpad, archive indices, autopkgtest | `mcp/ubuntu-archive/` |
+| **MCP Server** | Real-time data access to Launchpad, archive indices, autopkgtest | `tools/ubuntu-archive/` |
 | **Skills** | Domain knowledge and step-by-step workflows for each hygiene strategy | `.agents/skills/` |
 | **Helper Scripts** | Local operations: builds, analysis, generation | `scripts/` |
 
@@ -30,7 +30,7 @@ project/
 │   ├── analyze-skipped-tests/  Investigate skipped/failing tests
 │   ├── fix-copyright/       Audit and fix debian/copyright
 │   └── skill-creator/       Meta-skill for creating new skills
-├── mcp/ubuntu-archive/      MCP server
+├── tools/ubuntu-archive/    MCP server
 │   ├── server.py            14 MCP tools
 │   ├── pyproject.toml       uv-managed dependencies
 │   └── tests/               Integration tests against live Launchpad
@@ -58,7 +58,7 @@ project/
 ### Set up the MCP server
 
 ```bash
-cd mcp/ubuntu-archive
+cd tools/ubuntu-archive
 uv sync
 ```
 
@@ -68,7 +68,7 @@ This creates a virtual environment and installs all dependencies including
 ### Run the tests
 
 ```bash
-cd mcp/ubuntu-archive
+cd tools/ubuntu-archive
 uv run python tests/test_server.py
 ```
 
@@ -79,7 +79,7 @@ bug queries.
 ### Start the MCP server
 
 ```bash
-cd mcp/ubuntu-archive
+cd tools/ubuntu-archive
 uv run ubuntu-archive-mcp
 ```
 
@@ -93,7 +93,7 @@ For **opencode**, add to `.config/opencode/config.json`:
     "ubuntu-archive": {
       "command": "uv",
       "args": ["run", "ubuntu-archive-mcp"],
-      "cwd": "/project/mcp/ubuntu-archive"
+      "cwd": "/project/tools/ubuntu-archive"
     }
   }
 }
@@ -317,13 +317,13 @@ and step-by-step instructions for them to do it manually.
 ### Running tests
 
 ```bash
-cd mcp/ubuntu-archive
+cd tools/ubuntu-archive
 uv run python tests/test_server.py
 ```
 
 ### Adding a new MCP tool
 
-Add an `@mcp.tool()` function to `mcp/ubuntu-archive/server.py`. Follow the
+Add an `@mcp.tool()` function to `tools/ubuntu-archive/server.py`. Follow the
 existing pattern: docstring with `Args:` section, type-annotated parameters,
 return a dict. The tool is auto-registered by FastMCP.
 

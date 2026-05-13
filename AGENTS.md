@@ -55,7 +55,7 @@ Real-time access to the Ubuntu Archive via Launchpad and archive indices.
 
 **Start command:**
 ```bash
-cd /project/mcp/ubuntu-archive && uv run ubuntu-archive-mcp
+cd /project/tools/ubuntu-archive && uv run ubuntu-archive-mcp
 ```
 
 **Configuration** (for opencode, add to `.config/opencode/config.json`):
@@ -65,7 +65,7 @@ cd /project/mcp/ubuntu-archive && uv run ubuntu-archive-mcp
     "ubuntu-archive": {
       "command": "uv",
       "args": ["run", "ubuntu-archive-mcp"],
-      "cwd": "/project/mcp/ubuntu-archive"
+      "cwd": "/project/tools/ubuntu-archive"
     }
   }
 }

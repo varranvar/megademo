@@ -14,7 +14,7 @@
     "ubuntu-archive": {
       "type": "local",
       "enabled": true,
-      "command": ["bash", "-c", "cd mcp/ubuntu-archive && . .venv/bin/activate && exec python3 server.py"]
+      "command": ["./run-tool.sh", "ubuntu-archive"]
     }
   }
 }

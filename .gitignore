@@ -1,6 +1,6 @@
 .workshop.lock
-.mcp/
 .launchpad_cache/
+frontend/data
 __pycache__/
 *.pyc
 *.pyo
