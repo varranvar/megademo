@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "lp-bug-triage": {
+      "type": "local",
+      "enabled": true,
+      "command": ["python3", "server.py"],
+    }
+  }
+}
